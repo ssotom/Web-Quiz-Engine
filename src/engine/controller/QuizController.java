@@ -1,10 +1,12 @@
 package engine.controller;
 
+import engine.model.quiz.Answer;
 import engine.model.quiz.Feedback;
 import engine.model.quiz.Quiz;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class QuizController {
     }
 
     @PostMapping
-    public Quiz create(@RequestBody Quiz quiz) {
+    public Quiz create(@Valid @RequestBody Quiz quiz) {
         quiz.setId(quizzes.size() + 1);
         quizzes.add(quiz);
 
@@ -36,7 +38,7 @@ public class QuizController {
     }
 
     @PostMapping("/{id}/solve")
-    public Feedback solve(@PathVariable int id, @RequestParam int answer) {
+    public Feedback solve(@PathVariable int id, @RequestBody Answer answer) {
         return quizzes.get(id - 1).solve(answer);
     }
 

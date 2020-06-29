@@ -2,16 +2,24 @@ package engine.model.quiz;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
+import java.util.Set;
 
 public class Quiz {
 
     private int id;
+    @NotBlank
     private String title;
+    @NotBlank
     private String text;
+    @NotNull
+    @Size(min = 2)
     private List<String> options;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private int answer;
+    private Set<Integer> answer;
 
     public int getId() {
         return id;
@@ -41,23 +49,24 @@ public class Quiz {
         return options;
     }
 
-    public void setOptions(List<String> options) {
+    public void setOptions(List<String>options) {
         this.options = options;
     }
 
-
-    public int getAnswer() {
+    public Set<Integer> getAnswer() {
         return answer;
     }
 
-    public void setAnswer(int answer) {
+    public void setAnswer(Set<Integer> answer) {
         this.answer = answer;
     }
 
-    public Feedback solve(int answer) {
+    public Feedback solve(Answer answer) {
         Feedback feedback = new Feedback();
+        Set<Integer> answerSet = answer.getAnswer();
 
-        if (this.answer == answer) {
+        if ((this.answer == null && answerSet.isEmpty())
+                || (this.answer != null && this.answer.equals(answerSet))) {
             feedback.setSuccess(true);
             feedback.setFeedback("Congratulations, you're right!");
         } else {
