@@ -2,37 +2,51 @@ package engine.controller;
 
 import engine.model.quiz.Feedback;
 import engine.model.quiz.Quiz;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController()
-@RequestMapping("api/quiz")
+@RequestMapping("api/quizzes")
 public class QuizController {
 
+    List<Quiz> quizzes = new ArrayList<>();
+
     @GetMapping
-    public Quiz get() {
-        Quiz quiz = new Quiz();
-        List<String> options = List.of("Robot","Tea leaf","Cup of coffee","Bug");
-        quiz.setTitle("The Java Logo");
-        quiz.setText("What is depicted on the Java logo?");
-        quiz.setOptions(options);
+    public List<Quiz> getAll() {
+        return quizzes;
+    }
+
+    @GetMapping("/{id}")
+    public Quiz getById(@PathVariable int id) {
+        if (id <= quizzes.size()) {
+            return quizzes.get(id - 1);
+        }
+        throw new QuizNotFoundException(id);
+    }
+
+    @PostMapping
+    public Quiz create(@RequestBody Quiz quiz) {
+        quiz.setId(quizzes.size() + 1);
+        quizzes.add(quiz);
 
         return quiz;
     }
 
-    @PostMapping
-    public Feedback solveQuiz(@RequestParam int answer) {
-        Feedback feedback = new Feedback();
-
-        if (answer == 2) {
-            feedback.setSuccess(true);
-            feedback.setFeedback("Congratulations, you're right!");
-        } else {
-            feedback.setSuccess(false);
-            feedback.setFeedback("Wrong answer! Please, try again.");
-        }
-
-        return feedback;
+    @PostMapping("/{id}/solve")
+    public Feedback solve(@PathVariable int id, @RequestParam int answer) {
+        return quizzes.get(id - 1).solve(answer);
     }
+
+}
+
+@ResponseStatus(HttpStatus.NOT_FOUND)
+class QuizNotFoundException extends RuntimeException {
+
+    public QuizNotFoundException(int id) {
+        super("Could not find a quiz with id: " + id);
+    }
+
 }
